@@ -5,14 +5,15 @@ const serializers = require('../utils/serializers')
 const overlayDrafts = require('../utils/overlayDrafts')
 const hasToken = !!client.config().token
 
-function generatePost (post) {
+function generatePost(post) {
   return {
     ...post,
+    excerpt: BlocksToMarkdown(post.excerpt, { serializers, ...client.config() }),
     body: BlocksToMarkdown(post.body, { serializers, ...client.config() })
   }
 }
 
-async function getPosts () {
+async function getPosts() {
   // Learn more: https://www.sanity.io/docs/data-store/how-queries-work
   const filter = groq`*[_type == "post" && defined(slug) && publishedAt < now()]`
   const projection = groq`{
@@ -20,6 +21,8 @@ async function getPosts () {
     publishedAt,
     title,
     slug,
+    excerpt,
+    mainImage,
     body[]{
       ...,
       children[]{
